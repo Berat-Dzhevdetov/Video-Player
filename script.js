@@ -12,6 +12,9 @@ const volumeSlider = document.querySelector('.volume-slider');
 
 const currentTimeElem = document.querySelector('.current-time');
 const totalTimeElem = document.querySelector('.total-time');
+
+const listOfSpeeds = document.querySelectorAll('.choose-speed-list li');
+const speedBtn = document.querySelector('.speed-btn');
 // #endregion Query Selectors
 
 // #region Adding event listeners
@@ -42,6 +45,10 @@ video.addEventListener('volumechange', onVolumeChange);
 video.addEventListener('loadeddata', showDuration);
 video.addEventListener('timeupdate', changeCurrentTime);
 // #endregion Duration
+
+// #region Speed
+listOfSpeeds.forEach(li => li.addEventListener('click', e => changeVideoSpeed(e)));
+// #endregion Speed
 
 document.addEventListener("keydown", e => handleUserKeyboardInteraction(e));
 // #endregion Adding event listeners
@@ -163,6 +170,14 @@ function changeCurrentTime() {
     currentTimeElem.textContent = formatDuration(video.currentTime);
 }
 //  #endregion Duration
+
+//  #region Speed
+function changeVideoSpeed(e) {
+    const rateSpeed = e.currentTarget.dataset.speedLevel
+    video.playbackRate = rateSpeed;
+    speedBtn.innerText = `${rateSpeed}x`;
+}
+//  #endregion Speed
 //  #endregion Functions for the event listeners
 
 // #region Help Funcitons

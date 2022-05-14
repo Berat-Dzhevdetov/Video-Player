@@ -74,7 +74,7 @@ video {
     content: "";
     position: absolute;
     bottom: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, .75), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, .95), transparent);
     width: 100%;
     aspect-ratio: 6 / 1;
     z-index: -1;
@@ -145,9 +145,40 @@ video {
     transform: scaleX(1);
 }
 
-.duration-container{
+.duration-container {
     display: flex;
     align-items: center;
     gap: .25rem;
     flex-grow: 1;
+}
+
+.video-controls-container .controls button.wide-btn {
+    width: 50px;
+}
+
+.speed-container .speed-btn:hover+.popup-container,
+.speed-container .popup-container:hover {
+    display: block;
+}
+
+.speed-container .popup-container {
+    display: none;
+    position: absolute;
+    bottom: 35px;
+    right: 64px;
+}
+
+.speed-container .popup-container .choose-speed-list {
+    list-style-type: none;
+}
+
+.speed-container .popup-container .choose-speed-list li {
+    padding: 0.45rem 1rem;
+    background-color: rgba(0, 0, 0, 0.80);
+    user-select: none;
+    cursor: pointer;
+}
+
+.speed-container .popup-container .choose-speed-list li:hover {
+    background-color: rgba(0, 0, 0, .70);
 }
