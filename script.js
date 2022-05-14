@@ -1,4 +1,4 @@
-// #region Query Selectors
+//  #region Query Selectors
 const video = document.querySelector('video');
 const videoContainer = document.querySelector('.video-container')
 
@@ -15,46 +15,55 @@ const totalTimeElem = document.querySelector('.total-time');
 
 const listOfSpeeds = document.querySelectorAll('.choose-speed-list li');
 const speedBtn = document.querySelector('.speed-btn');
-// #endregion Query Selectors
 
-// #region Adding event listeners
-// #region Play/Pause
+const timelineContainer = document.querySelector('.timeline-container');
+//  #endregion Query Selectors
+
+//  #region Adding event listeners
+//  #region Play/Pause
 playPauseBtn.addEventListener('click', togglePlay);
 
 video.addEventListener("play", onVideoPlay);
 video.addEventListener("pause", onVideoPause);
 video.addEventListener("click", togglePlay)
-// #endregion Play/Pause
+//  #endregion Play/Pause
 
-// #region View Modes
+//  #region View Modes
 theaterBtn.addEventListener('click', toggleTheaterMode);
 miniPlayerBtn.addEventListener('click', toggleMiniPlayerMode);
 fullScreenBtn.addEventListener('click', toggleFullScreenMode);
 document.addEventListener('fullscreenchange', toggleDocumentFullScreenMode);
 document.addEventListener('enterpictureinpicture', addVideoPictureInPictureMode);
 document.addEventListener('leavepictureinpicture', leaveVideoPictureInPictureMode);
-// #endregion View Modes
+//  #endregion View Modes
 
-// #region Volume
+//  #region Volume
 mutedBtn.addEventListener('click', toggleMute);
 volumeSlider.addEventListener('input', e => volumeSliderValueChange(e));
 video.addEventListener('volumechange', onVolumeChange);
-// #endregion Volume
+//  #endregion Volume
 
-// #region Duration
+//  #region Duration
 video.addEventListener('loadeddata', showDuration);
 video.addEventListener('timeupdate', changeCurrentTime);
-// #endregion Duration
+//  #endregion Duration
 
-// #region Speed
+//  #region Speed
 listOfSpeeds.forEach(li => li.addEventListener('click', e => changeVideoSpeed(e)));
-// #endregion Speed
+//  #endregion Speed
+
+//  #region Timeline
+timelineContainer.addEventListener('mousemove', handleTimelineUpdate);
+timelineContainer.addEventListener('mousedown', toggleScurbbing);
+document.addEventListener('mouseup', (e) => { if(isScrubbing) toggleScurbbing(e); });
+document.addEventListener('mousemove', (e) => { if(isScrubbing) handleTimelineUpdate(e); });
+//  #endregion Timeline
 
 document.addEventListener("keydown", e => handleUserKeyboardInteraction(e));
-// #endregion Adding event listeners
+//  #endregion Adding event listeners
 
-// #region Functions for the event listeners
-// #region Play/Pause
+//  #region Functions for the event listeners
+//  #region Play/Pause
 function togglePlay() {
     video.paused ? video.play() : video.pause();
 }
@@ -168,6 +177,8 @@ function showDuration() {
 
 function changeCurrentTime() {
     currentTimeElem.textContent = formatDuration(video.currentTime);
+    const percent = video.currentTime / video.duration;
+    timelineContainer.style.setProperty("--progress-position", percent);
 }
 //  #endregion Duration
 
@@ -178,6 +189,37 @@ function changeVideoSpeed(e) {
     speedBtn.innerText = `${rateSpeed}x`;
 }
 //  #endregion Speed
+//  #region Timeline
+let isScrubbing = false;
+let wasPaused;
+function handleTimelineUpdate(e) {
+    const rect = timelineContainer.getBoundingClientRect();
+    const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+    timelineContainer.style.setProperty("--preview-position", percent);
+
+    if (isScrubbing) {
+        e.preventDefault();
+        timelineContainer.style.setProperty("--progress-position", percent);
+    }
+}
+
+function toggleScurbbing(e) {
+    const rect = timelineContainer.getBoundingClientRect();
+    const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+
+    isScrubbing = (e.buttons & 1) === 1
+    videoContainer.classList.toggle("scrubbing", isScrubbing);
+    if (isScrubbing) {
+        wasPaused = video.paused;
+        video.pause();
+    } else {
+        video.currentTime = percent * video.duration;
+        if(!wasPaused) video.play();
+    }
+
+    handleTimelineUpdate(e);
+}
+//  #endregion Timeline
 //  #endregion Functions for the event listeners
 
 // #region Help Funcitons
