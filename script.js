@@ -1,29 +1,53 @@
+// #region Query Selectors
 const video = document.querySelector('video');
 const videoContainer = document.querySelector('.video-container')
+
 const playPauseBtn = document.querySelector('.play-pause-btn');
 const theaterBtn = document.querySelector('.theater-player-btn');
 const miniPlayerBtn = document.querySelector('.mini-player-btn');
 const fullScreenBtn = document.querySelector('.full-screen-player-btn');
 
-// Adding event listeners
-// Play/Pause
+const mutedBtn = document.querySelector('.mute-btn');
+const volumeSlider = document.querySelector('.volume-slider');
+
+const currentTimeElem = document.querySelector('.current-time');
+const totalTimeElem = document.querySelector('.total-time');
+// #endregion Query Selectors
+
+// #region Adding event listeners
+// #region Play/Pause
 playPauseBtn.addEventListener('click', togglePlay);
 
 video.addEventListener("play", onVideoPlay);
 video.addEventListener("pause", onVideoPause);
 video.addEventListener("click", togglePlay)
-// View Modes
+// #endregion Play/Pause
+
+// #region View Modes
 theaterBtn.addEventListener('click', toggleTheaterMode);
 miniPlayerBtn.addEventListener('click', toggleMiniPlayerMode);
 fullScreenBtn.addEventListener('click', toggleFullScreenMode);
 document.addEventListener('fullscreenchange', toggleDocumentFullScreenMode);
 document.addEventListener('enterpictureinpicture', addVideoPictureInPictureMode);
 document.addEventListener('leavepictureinpicture', leaveVideoPictureInPictureMode);
+// #endregion View Modes
+
+// #region Volume
+mutedBtn.addEventListener('click', toggleMute);
+volumeSlider.addEventListener('input', e => volumeSliderValueChange(e));
+video.addEventListener('volumechange', onVolumeChange);
+// #endregion Volume
+
+// #region Duration
+video.addEventListener('loadeddata', showDuration);
+video.addEventListener('timeupdate', changeCurrentTime);
+// #endregion Duration
 
 document.addEventListener("keydown", e => handleUserKeyboardInteraction(e));
+// #endregion Adding event listeners
 
-// Functions for the event listeners
-// Play/Pause
+// #region Functions for the event listeners
+// #region Play/Pause
 function togglePlay() {
     video.paused ? video.play() : video.pause();
 }
@@ -39,11 +63,11 @@ function onVideoPause() {
 function handleUserKeyboardInteraction(e) {
     const tagName = document.activeElement.tagName.toLocaleLowerCase();
 
-    if(tagName === "input") return;
+    if (tagName === "input") return;
 
     switch (e.key.toLowerCase()) {
         case " ":
-            if(tagName === "button") return;
+            if (tagName === "button") return;
         case "k":
             togglePlay();
             break;
@@ -56,10 +80,20 @@ function handleUserKeyboardInteraction(e) {
         case "i":
             toggleMiniPlayerMode();
             break;
+        case "m":
+            toggleMute();
+            break;
+        case "arrowleft":
+            skip(-5);
+            break;
+        case "arrowright":
+            skip(5);
+            break;
     }
 }
+//  #endregion Play/Pause
 
-// View Modes
+//  #region View Modes
 function toggleTheaterMode() {
     videoContainer.classList.toggle("theater");
 }
@@ -92,3 +126,63 @@ function addVideoPictureInPictureMode() {
 function leaveVideoPictureInPictureMode() {
     videoContainer.classList.remove("mini-player");
 }
+//  #endregion View Modes
+
+//  #region Volume
+function volumeSliderValueChange(e) {
+    video.volume = e.target.value;
+    video.muted = e.target.value === 0;
+}
+
+function toggleMute() {
+    video.muted = !video.muted;
+}
+
+function onVolumeChange() {
+    volumeSlider.value = video.volume;
+    let volumeLevel;
+
+    if (video.muted || video.volume === 0) {
+        volumeSlider.value = 0;
+        volumeLevel = "muted";
+    } else if (video.volume >= 0.5) {
+        volumeLevel = "high";
+    } else {
+        volumeLevel = "low";
+    }
+
+    videoContainer.dataset.volumeLevel = volumeLevel;
+}
+//  #endregion Volume
+//  #region Duration
+function showDuration() {
+    totalTimeElem.textContent = formatDuration(video.duration);
+}
+
+function changeCurrentTime() {
+    currentTimeElem.textContent = formatDuration(video.currentTime);
+}
+//  #endregion Duration
+//  #endregion Functions for the event listeners
+
+// #region Help Funcitons
+// #region Duration
+const leadingZeroFormater = new Intl.NumberFormat(undefined, { minimumIntegerDigits: 2 });
+
+function formatDuration(time) {
+    const seconds = Math.floor(time % 60);
+    const minutes = Math.floor(time / 60) % 60;
+    const hours = Math.floor(time / 3600);
+
+    if (hours === 0) {
+        return `${minutes}:${leadingZeroFormater.format(seconds)}`
+    } else {
+        return `${hours}:${leadingZeroFormater.format(minutes)}:${leadingZeroFormater.format(seconds)}`
+    }
+}
+
+function skip(duration) {
+    video.currentTime += duration;
+}
+// #endregion Duration
+// #endregion Help Funcitons
