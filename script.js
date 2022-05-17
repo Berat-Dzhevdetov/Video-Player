@@ -12,6 +12,8 @@ const volumeSlider = document.querySelector('.volume-slider');
 
 const currentTimeElem = document.querySelector('.current-time');
 const totalTimeElem = document.querySelector('.total-time');
+const leftPart = document.querySelector('.left-part');
+const rightPart = document.querySelector('.right-part');
 
 const listOfSpeeds = document.querySelectorAll('.choose-speed-list li');
 const speedBtn = document.querySelector('.speed-btn');
@@ -46,17 +48,18 @@ video.addEventListener('volumechange', onVolumeChange);
 //  #region Duration
 video.addEventListener('loadeddata', showDuration);
 video.addEventListener('timeupdate', changeCurrentTime);
+videoContainer.addEventListener('dblclick', onDBLClickSkipTime);
 //  #endregion Duration
 
 //  #region Speed
-listOfSpeeds.forEach(li => li.addEventListener('click', e => changeVideoSpeed(e)));
+listOfSpeeds.forEach(li => li.addEventListener('click', changeVideoSpeed));
 //  #endregion Speed
 
 //  #region Timeline
 timelineContainer.addEventListener('mousemove', handleTimelineUpdate);
 timelineContainer.addEventListener('mousedown', toggleScurbbing);
-document.addEventListener('mouseup', (e) => { if(isScrubbing) toggleScurbbing(e); });
-document.addEventListener('mousemove', (e) => { if(isScrubbing) handleTimelineUpdate(e); });
+document.addEventListener('mouseup', (e) => { if (isScrubbing) toggleScurbbing(e); });
+document.addEventListener('mousemove', (e) => { if (isScrubbing) handleTimelineUpdate(e); });
 //  #endregion Timeline
 
 document.addEventListener("keydown", e => handleUserKeyboardInteraction(e));
@@ -175,6 +178,20 @@ function showDuration() {
     totalTimeElem.textContent = formatDuration(video.duration);
 }
 
+function onDBLClickSkipTime(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const elementWidth = rect.width;
+    const leftOffset = e.currentTarget.offsetLeft;
+
+    let x = e.pageX - leftOffset;
+
+    if (elementWidth / 2 > x) {
+        skip(-5);
+    } else {
+        skip(5);
+    }
+}
+
 function changeCurrentTime() {
     currentTimeElem.textContent = formatDuration(video.currentTime);
     const percent = video.currentTime / video.duration;
@@ -214,7 +231,7 @@ function toggleScurbbing(e) {
         video.pause();
     } else {
         video.currentTime = percent * video.duration;
-        if(!wasPaused) video.play();
+        if (!wasPaused) video.play();
     }
 
     handleTimelineUpdate(e);

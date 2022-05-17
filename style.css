@@ -15,6 +15,25 @@
     background-color: black;
 }
 
+.video-container .left-part,
+.video-container .right-part{
+    background-color: transparent;
+    position: absolute;
+    width: 50%;
+    height: 100%;
+}
+
+.video-container .left-part{
+    left:0;
+    top: 0;
+}
+
+.video-container .right-part{
+    right:0;
+    top: 0;
+}
+
+
 .video-container.theater,
 .video-container.full-screen {
     max-width: initial;
